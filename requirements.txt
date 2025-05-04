@@ -1,0 +1,8 @@
+fastapi[standard] == 0.115.4
+sqlmodel == 0.0.22
+pytest == 8.3.3
+psycopg2-binary == 2.9.10
+requests
+pyjwt
+cryptography
+passlib

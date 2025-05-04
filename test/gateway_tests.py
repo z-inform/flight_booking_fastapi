@@ -384,3 +384,69 @@ def test_refund_ticket_authorized():
     headers = get_auth_headers()
     response = client.delete(f"/api/v1/tickets/{pytest.ticket_id}", headers=headers)
     assert response.status_code == 204
+
+
+def test_find_cheapest_route_unauthorized():
+    """Test direct flight route"""
+    response = client.get(
+        "/api/v1/routes/cheapest?from_airport=Пулково&to_airport=Шереметьево",
+    )
+
+    assert response.status_code == 401
+
+
+def test_find_cheapest_route_direct():
+    """Test direct flight route"""
+    headers = get_auth_headers()
+    response = client.get(
+        "/api/v1/routes/cheapest?from_airport=Пулково&to_airport=Домодедово",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_price"] == 500  # Known price from test data
+    assert len(data["flights"]) == 1
+    assert data["flights"][0]["flight_number"] == "AFL032"
+
+
+def test_find_cheapest_route_with_connection():
+    """Test multi-flight route with connection"""
+    headers = get_auth_headers()
+    response = client.get(
+        "/api/v1/routes/cheapest?from_airport=Пулково&to_airport=Шереметьево",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    # Should find the cheaper connecting route
+    assert len(data["flights"]) == 2
+    assert data["flights"][0]["flight_number"] == "AFL032"
+    assert data["flights"][1]["flight_number"] == "AFL033"
+    assert data["total_price"] == 1200  # Sum of both flight prices
+
+
+def test_missing_airport():
+    """Test when departure airport doesn't exist"""
+    headers = get_auth_headers()
+    response = client.get(
+        "/api/v1/routes/cheapest?from_airport=Unknown&to_airport=Шереметьево",
+        headers=headers,
+    )
+
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"].lower()
+
+
+def test_same_source_and_destination():
+    """Test when from and to airports are the same"""
+    headers = get_auth_headers()
+    response = client.get(
+        "/api/v1/routes/cheapest?from_airport=Пулково&to_airport=Пулково",
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_price"] == 0

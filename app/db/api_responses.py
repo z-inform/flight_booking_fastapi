@@ -1,4 +1,18 @@
+from typing import List
+
 from sqlmodel import SQLModel
+
+class FlightPath(SQLModel):
+    flight_number: str
+    from_airport: str
+    to_airport: str
+    price: int
+    date: str
+
+
+class CheapestRouteResponse(SQLModel):
+    total_price: int
+    flights: List[FlightPath]
 
 
 class FlightResponse(SQLModel):

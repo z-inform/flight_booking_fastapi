@@ -1,6 +1,8 @@
 from typing import Annotated
 from datetime import datetime
 from contextlib import asynccontextmanager
+import math
+from heapq import heappop, heappush
 
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.responses import JSONResponse
@@ -10,7 +12,7 @@ from fastapi.security import (
     HTTPBearer,
     HTTPAuthorizationCredentials,
 )
-from sqlmodel import select
+from sqlmodel import select, Session
 
 from .db.api_responses import (
     Token,
@@ -23,6 +25,8 @@ from .db.api_responses import (
     PrivilegeDataJSON,
     FlightData,
     OpenUser,
+    CheapestRouteResponse,
+    FlightPath,
 )
 from .db.session import create_db_and_tables, SessionDep
 from .db.users import User, UserCreate
@@ -318,3 +322,120 @@ def privilege_info_endpoint(
 ) -> PrivilegeHistoryDataJSON:
     user_id = user_info["id"]
     return get_privilege_history(user_id, session)
+
+
+def build_flight_graph(session: Session):
+    """Build a graph representation of all flights"""
+    flights = session.exec(select(Flight)).all()
+    graph = {}
+
+    for flight in flights:
+        from_airport = session.exec(
+            select(Airport).where(Airport.id == flight.from_airport_id)
+        ).first()
+        to_airport = session.exec(
+            select(Airport).where(Airport.id == flight.to_airport_id)
+        ).first()
+
+        if from_airport.name not in graph:
+            graph[from_airport.name] = []
+
+        graph[from_airport.name].append(
+            {
+                "to": to_airport.name,
+                "flight_number": flight.flight_number,
+                "price": flight.price,
+                "date": flight.datetime.strftime("%Y-%m-%d"),
+            }
+        )
+
+    return graph
+
+
+def find_cheapest_route(graph, start, end):
+    """Dijkstra's algorithm to find cheapest route"""
+    prices = {airport: math.inf for airport in graph}
+    prices[start] = 0
+    previous = {airport: None for airport in graph}
+    queue = [(0, start)]
+
+    while queue:
+        current_price, current_airport = heappop(queue)
+
+        if current_airport == end:
+            break
+
+        if current_price > prices[current_airport]:
+            continue
+
+        for flight in graph.get(current_airport, []):
+            neighbor = flight["to"]
+            price = current_price + flight["price"]
+
+            if price < prices[neighbor]:
+                prices[neighbor] = price
+                previous[neighbor] = (current_airport, flight)
+                heappush(queue, (price, neighbor))
+
+    # Reconstruct path
+    path = []
+    current = end
+
+    while previous[current]:
+        prev_airport, flight = previous[current]
+        path.append(flight)
+        current = prev_airport
+
+    path.reverse()
+
+    return {"total_price": prices[end], "flights": path}
+
+
+@app.get("/api/v1/routes/cheapest", status_code=200)
+def get_cheapest_route(
+    from_airport: str,
+    to_airport: str,
+    session: SessionDep,
+    user_info: dict = Depends(auth_dependency),
+) -> CheapestRouteResponse:
+    """
+    Find the cheapest flight route between two airports.
+    """
+    del user_info
+
+    # Build flight graph
+    graph = build_flight_graph(session)
+
+    # Check if airports exist
+    if from_airport not in graph:
+        raise HTTPException(
+            status_code=404, detail=f"Departure airport '{from_airport}' not found"
+        )
+
+    if to_airport not in graph:
+        raise HTTPException(
+            status_code=404, detail=f"Arrival airport '{to_airport}' not found"
+        )
+
+    # Find cheapest route
+    route = find_cheapest_route(graph, from_airport, to_airport)
+
+    if route["total_price"] == math.inf:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No available route from {from_airport} to {to_airport}",
+        )
+
+    # Format response
+    flights = [
+        FlightPath(
+            flight_number=f["flight_number"],
+            from_airport=from_airport if i == 0 else route["flights"][i - 1]["to"],
+            to_airport=f["to"],
+            price=f["price"],
+            date=f["date"],
+        )
+        for i, f in enumerate(route["flights"])
+    ]
+
+    return CheapestRouteResponse(total_price=route["total_price"], flights=flights)

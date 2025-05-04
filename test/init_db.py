@@ -92,6 +92,7 @@ def create_test_flights(session: Session):
     sheremetyevo = session.exec(
         select(Airport).where(Airport.name == "Шереметьево")
     ).first()
+    domodedovo = session.exec(select(Airport).where(Airport.name == "Домодедово")).first()
 
     flights.append(
         Flight(
@@ -100,6 +101,26 @@ def create_test_flights(session: Session):
             from_airport_id=pulkovo.id,
             to_airport_id=sheremetyevo.id,
             price=1500,
+        )
+    )
+
+    flights.append(
+        Flight(
+            flight_number="AFL032",
+            datetime=datetime.now() + timedelta(days=7),
+            from_airport_id=pulkovo.id,
+            to_airport_id=domodedovo.id,
+            price=500,
+        )
+    )
+
+    flights.append(
+        Flight(
+            flight_number="AFL033",
+            datetime=datetime.now() + timedelta(days=7),
+            from_airport_id=domodedovo.id,
+            to_airport_id=sheremetyevo.id,
+            price=700,
         )
     )
 

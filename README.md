@@ -9,6 +9,7 @@
 ```
 git clone https://github.com/z-inform/flight_booking_fastapi
 cd flight_booking_fastapi
+cp app/auth/.env.example app/auth/.env
 docker compose up -d
 ```
 

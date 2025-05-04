@@ -292,7 +292,7 @@ def test_buy_ticket_authorized():
         headers=headers,
         json={
             "flightNumber": FLIGHT_NUMBER,
-            "price": TICKET_PRICE,
+            "bonus_amount": 0,
             "paidFromBalance": False,
         },
     )

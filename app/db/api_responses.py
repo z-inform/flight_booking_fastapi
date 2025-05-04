@@ -53,8 +53,8 @@ class Token(SQLModel):
 
 class TicketPurchaseRequest(SQLModel):
     flightNumber: str
-    price: int
     paidFromBalance: bool
+    bonus_amount: int
 
 
 class PrivilegeDataJSON(SQLModel):

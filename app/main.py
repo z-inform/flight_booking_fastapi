@@ -193,7 +193,7 @@ def create_ticket_endpoint(
     ticket = Ticket(
         user_id=user_id,
         flight_id=flight.id,
-        price=ticket_purchase_request.price,
+        price=flight.price,
         status="PAID",
     )
     session.add(ticket)
@@ -211,7 +211,7 @@ def create_ticket_endpoint(
         session.commit()
 
     if ticket_purchase_request.paidFromBalance:
-        paid_by_bonuses = min(ticket_purchase_request.price, privilege.balance)
+        paid_by_bonuses = min(ticket_purchase_request.bonus_amount, privilege.balance)
         new_balance = privilege.balance - paid_by_bonuses
         paid_by_money = flight.price - paid_by_bonuses
         balance_diff = paid_by_bonuses

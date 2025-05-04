@@ -207,20 +207,15 @@ def create_ticket_endpoint(
         session.commit()
 
     if ticket_purchase_request.paidFromBalance:
-        if privilege.balance >= ticket_purchase_request.price:
-            paid_by_money = 0
-            paid_by_bonuses = ticket_purchase_request.price
-            new_balance = privilege.balance - paid_by_bonuses
-        else:
-            paid_by_money = ticket_purchase_request.price - privilege.balance
-            paid_by_bonuses = privilege.balance
-            new_balance = 0
+        paid_by_bonuses = min(ticket_purchase_request.price, privilege.balance)
+        new_balance = privilege.balance - paid_by_bonuses
+        paid_by_money = flight.price - paid_by_bonuses
+        balance_diff = paid_by_bonuses
     else:
-        paid_by_money = ticket_purchase_request.price
+        paid_by_money = flight.price
         paid_by_bonuses = 0
-        new_balance = privilege.balance + int(
-            ticket_purchase_request.price * 0.1
-        )  # 10% bonus
+        balance_diff = int(flight.price * 0.1)  # 10% bonus
+        new_balance = privilege.balance + balance_diff
 
     # Update privilege
     privilege.balance = new_balance
@@ -231,9 +226,7 @@ def create_ticket_endpoint(
         privilege_id=privilege.id,
         ticket_id=ticket.id,
         datetime=datetime.now(),
-        balance_diff=int(ticket_purchase_request.price * 0.1)
-        if not ticket_purchase_request.paidFromBalance
-        else -paid_by_bonuses,
+        balance_diff=balance_diff,
         operation_type="FILL_IN_BALANCE"
         if not ticket_purchase_request.paidFromBalance
         else "DEBIT_THE_ACCOUNT",

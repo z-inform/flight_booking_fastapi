@@ -1,0 +1,2 @@
+CREATE DATABASE travelling;
+GRANT ALL PRIVILEGES ON DATABASE travelling TO program;

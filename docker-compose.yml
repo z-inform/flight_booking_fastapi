@@ -1,0 +1,46 @@
+services:
+  postgres:
+    image: library/postgres:13
+    container_name: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: postgres
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+      - ./postgres/:/docker-entrypoint-initdb.d/
+    ports:
+      - "5432:5432"
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U program -d travelling"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  
+  gateway:
+    depends_on: 
+      - postgres
+    container_name: gateway
+    restart: on-failure
+    build:
+      dockerfile: ./app/Dockerfile
+      args:
+        database_url: "postgresql://program:test@postgres:5432/travelling"
+    ports:
+      - "8080:8080"
+    networks:
+      - app
+    env_file:
+      - path: ./app/auth/.env
+
+
+networks:
+  app:
+
+volumes:
+  db-data:
+  keycloak-data:

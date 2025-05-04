@@ -1,16 +1,15 @@
-from sqlmodel import *
-import uuid
+from sqlmodel import SQLModel, Field
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 class User(SQLModel, table=True):
     """Database model for User accounts"""
+
     __tablename__ = "users"
 
-    id: int = Field(
-        default=None, primary_key=True, description="Primary key ID"
-    )
+    id: int = Field(default=None, primary_key=True, description="Primary key ID")
     login: str = Field(
         index=True,
         unique=True,
@@ -26,10 +25,6 @@ class User(SQLModel, table=True):
         """Verify a plain password against the stored hash"""
         return pwd_context.verify(plain_password, self.hashed_password)
 
-class OpenUser(SQLModel):
-    id: int
-    login: str
-    email: str
 
 class UserCreate(SQLModel):
     """Model for creating a new user (includes password)"""
@@ -45,6 +40,3 @@ class UserCreate(SQLModel):
             email=self.email,
             hashed_password=pwd_context.hash(self.password),
         )
-
-class TokenData(SQLModel):
-    username: str

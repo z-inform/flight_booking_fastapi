@@ -2,8 +2,9 @@ from fastapi import *
 from fastapi.responses import *
 from fastapi.exceptions import RequestValidationError
 from sqlmodel import *
-from ..db.flights import *
+from ..db.flights import Flight
 from ..db.session import SessionDep
+from ..db.api_responses import FlightsResponse, FlightData
 from typing import Annotated
 from fastapi.encoders import jsonable_encoder
 from contextlib import asynccontextmanager
@@ -14,8 +15,9 @@ import os
 
 def get_all_flights(page: int, size: int, session: SessionDep) -> FlightsResponse:
     query = text(
-        f"""SELECT flights.flight_number, flights.datetime, flights.price, a1.name as n1, a1.city as c1, a2.name as n2, a2.city as c2
-from flights join airports a1 on flights.from_airport_id = a1.id join airports a2 on flights.to_airport_id = a2.id"""
+        """SELECT flights.flight_number, flights.datetime, flights.price, a1.name as n1, a1.city """
+        """as c1, a2.name as n2, a2.city as c2 from flights join airports a1 on """
+        """flights.from_airport_id = a1.id join airports a2 on flights.to_airport_id = a2.id"""
     )
     flights = session.exec(query).all()
     items: list[FlightData] = []
@@ -46,8 +48,10 @@ from flights join airports a1 on flights.from_airport_id = a1.id join airports a
 
 def get_flight(flightNumber: str, session: SessionDep) -> FlightData:
     query = text(
-        f"""SELECT flights.flight_number, flights.datetime, flights.price, a1.name as n1, a1.city as c1, a2.name as n2, a2.city as c2
-from flights join airports a1 on flights.from_airport_id = a1.id join airports a2 on flights.to_airport_id = a2.id where flights.flight_number=:flight_num"""
+        """SELECT flights.flight_number, flights.datetime, flights.price, """
+        """a1.name as n1, a1.city as c1, a2.name as n2, a2.city as c2 """
+        """from flights join airports a1 on flights.from_airport_id = a1.id """
+        """join airports a2 on flights.to_airport_id = a2.id where flights.flight_number=:flight_num"""
     )
     flight = session.exec(query, params={"flight_num": flightNumber}).first()
     if not flight:

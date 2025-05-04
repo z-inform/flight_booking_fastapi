@@ -1,0 +1,213 @@
+************* Module travelling_salesman.app.main
+app/main.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/main.py:39:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:82:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:137:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:149:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:158:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:166:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:172:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:267:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:275:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:283:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:312:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/main.py:323:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module travelling_salesman.app.auth.token
+app/auth/token.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/auth/token.py:14:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/auth/token.py:31:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/auth/token.py:42:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module travelling_salesman.app.db.users
+app/db/users.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+************* Module travelling_salesman.app.db.bonuses
+app/db/bonuses.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/db/bonuses.py:6:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/bonuses.py:12:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/bonuses.py:19:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/bonuses.py:24:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/bonuses.py:29:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/bonuses.py:39:0: C0115: Missing class docstring (missing-class-docstring)
+************* Module travelling_salesman.app.db.session
+app/db/session.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/db/session.py:16:0: C0116: Missing function or method docstring (missing-function-docstring)
+app/db/session.py:20:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module travelling_salesman.app.db.flights
+app/db/flights.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/db/flights.py:6:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/flights.py:25:0: C0115: Missing class docstring (missing-class-docstring)
+************* Module travelling_salesman.app.db.tickets
+app/db/tickets.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/db/tickets.py:4:0: C0115: Missing class docstring (missing-class-docstring)
+************* Module travelling_salesman.app.db.api_responses
+app/db/api_responses.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+app/db/api_responses.py:4:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:12:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:18:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:25:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:35:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:40:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:46:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:51:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:64:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:69:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:76:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:82:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:88:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:94:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:101:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:106:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:111:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:117:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:125:0: C0115: Missing class docstring (missing-class-docstring)
+app/db/api_responses.py:133:0: C0115: Missing class docstring (missing-class-docstring)
+************* Module travelling_salesman.test.init_db
+test/init_db.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+test/init_db.py:174:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module travelling_salesman.test.gateway_tests
+test/gateway_tests.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+
+
+Report
+======
+612 statements analysed.
+
+Statistics by type
+------------------
+
++---------+-------+-----------+-----------+------------+---------+
+|type     |number |old number |difference |%documented |%badname |
++=========+=======+===========+===========+============+=========+
+|module   |15     |15         |=          |33.33       |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+|class    |31     |31         |=          |6.45        |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+|method   |4      |4          |=          |100.00      |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+|function |47     |47         |=          |61.70       |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+
+
+
+External dependencies
+---------------------
+::
+
+    fastapi (travelling_salesman.app.auth.token,travelling_salesman.app.db.session,travelling_salesman.app.main)
+      \-exceptions (travelling_salesman.app.main)
+      \-responses (travelling_salesman.app.main)
+      \-security (travelling_salesman.app.main)
+      \-testclient (travelling_salesman.test.gateway_tests)
+    jwt (travelling_salesman.app.auth.token)
+    passlib 
+      \-context (travelling_salesman.app.db.users)
+    pytest (travelling_salesman.test.gateway_tests)
+    sqlmodel (travelling_salesman.app.db.api_responses,travelling_salesman.app.db.bonuses,travelling_salesman.app.db.flights,travelling_salesman.app.db.session,travelling_salesman.app.db.tickets,travelling_salesman.app.db.users,travelling_salesman.app.main,travelling_salesman.test.gateway_tests,travelling_salesman.test.init_db)
+    travelling_salesman 
+      \-app 
+        \-db 
+        | \-bonuses (travelling_salesman.test.init_db)
+        | \-flights (travelling_salesman.test.init_db)
+        | \-session (travelling_salesman.test.gateway_tests,travelling_salesman.test.init_db)
+        | \-tickets (travelling_salesman.test.init_db)
+        | \-users (travelling_salesman.test.gateway_tests,travelling_salesman.test.init_db)
+        \-main (travelling_salesman.test.gateway_tests)
+
+
+
+1278 lines have been analyzed
+
+Raw metrics
+-----------
+
++----------+-------+------+---------+-----------+
+|type      |number |%     |previous |difference |
++==========+=======+======+=========+===========+
+|code      |875    |68.47 |875      |=          |
++----------+-------+------+---------+-----------+
+|docstring |83     |6.49  |83       |=          |
++----------+-------+------+---------+-----------+
+|comment   |47     |3.68  |47       |=          |
++----------+-------+------+---------+-----------+
+|empty     |273    |21.36 |273      |=          |
++----------+-------+------+---------+-----------+
+
+
+
+Duplication
+-----------
+
++-------------------------+------+---------+-----------+
+|                         |now   |previous |difference |
++=========================+======+=========+===========+
+|nb duplicated lines      |0     |0        |0          |
++-------------------------+------+---------+-----------+
+|percent duplicated lines |0.000 |0.000    |=          |
++-------------------------+------+---------+-----------+
+
+
+
+Messages by category
+--------------------
+
++-----------+-------+---------+-----------+
+|type       |number |previous |difference |
++===========+=======+=========+===========+
+|convention |57     |57       |57         |
++-----------+-------+---------+-----------+
+|refactor   |0      |0        |0          |
++-----------+-------+---------+-----------+
+|warning    |0      |0        |0          |
++-----------+-------+---------+-----------+
+|error      |0      |0        |0          |
++-----------+-------+---------+-----------+
+
+
+
+% errors / warnings by module
+-----------------------------
+
++-----------------------------------------+------+--------+---------+-----------+
+|module                                   |error |warning |refactor |convention |
++=========================================+======+========+=========+===========+
+|travelling_salesman.app.db.api_responses |0.00  |0.00    |0.00     |36.84      |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.app.main             |0.00  |0.00    |0.00     |22.81      |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.app.db.bonuses       |0.00  |0.00    |0.00     |12.28      |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.app.auth.token       |0.00  |0.00    |0.00     |7.02       |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.app.db.session       |0.00  |0.00    |0.00     |5.26       |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.app.db.flights       |0.00  |0.00    |0.00     |5.26       |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.test.init_db         |0.00  |0.00    |0.00     |3.51       |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.app.db.tickets       |0.00  |0.00    |0.00     |3.51       |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.test.gateway_tests   |0.00  |0.00    |0.00     |1.75       |
++-----------------------------------------+------+--------+---------+-----------+
+|travelling_salesman.app.db.users         |0.00  |0.00    |0.00     |1.75       |
++-----------------------------------------+------+--------+---------+-----------+
+
+
+
+Messages
+--------
+
++---------------------------+------------+
+|message id                 |occurrences |
++===========================+============+
+|missing-class-docstring    |29          |
++---------------------------+------------+
+|missing-function-docstring |18          |
++---------------------------+------------+
+|missing-module-docstring   |10          |
++---------------------------+------------+
+
+
+
+
+------------------------------------------------------------------
+Your code has been rated at 9.07/10 (previous run: 9.07/10, +0.00)
+

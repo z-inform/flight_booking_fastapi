@@ -1,10 +1,12 @@
+from typing import Dict
+
 import pytest
 from fastapi.testclient import TestClient
+from sqlmodel import Session, select
+
 from ..app.main import app
 from ..app.db.session import engine
-from ..app.db.users import *
-from typing import Dict, Any
-from sqlmodel import Session, select
+from ..app.db.users import User
 from .init_db import fill_test_db
 
 fill_test_db()

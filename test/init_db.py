@@ -1,8 +1,9 @@
-from sqlmodel import *
-from datetime import datetime, timedelta
-import uuid
 import random
-from ..app.db.session import engine, get_session, create_db_and_tables
+from datetime import datetime, timedelta
+
+from sqlmodel import Session, select
+
+from ..app.db.session import engine, create_db_and_tables
 from ..app.db.users import User, UserCreate
 from ..app.db.flights import Flight, Airport
 from ..app.db.tickets import Ticket
@@ -142,7 +143,6 @@ def create_test_tickets(session: Session):
 
             # First create and commit the ticket to get an ID
             ticket = Ticket(
-                ticket_uid=uuid.uuid4(),
                 user_id=user.id,
                 flight_id=flight.id,
                 price=flight.price,

@@ -1,39 +1,43 @@
-from fastapi import *
-from fastapi.responses import *
-from fastapi.exceptions import RequestValidationError
-from sqlmodel import *
 from typing import Annotated
-from fastapi.encoders import jsonable_encoder
+from datetime import datetime
 from contextlib import asynccontextmanager
-import uvicorn
-from multiprocessing import Process
-import os
-import requests
-from http import HTTPStatus
+
+from fastapi import FastAPI, Depends, HTTPException, status, Request
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from fastapi.security import (
     OAuth2PasswordRequestForm,
     HTTPBearer,
     HTTPAuthorizationCredentials,
 )
-import jwt
-from datetime import datetime
+from sqlmodel import select
 
-from .db.api_responses import *
+from .db.api_responses import (
+    Token,
+    PaginationResponse,
+    TicketResponse,
+    TicketPurchaseRequest,
+    TicketPurchaseResponse,
+    UserInfoResponse,
+    PrivilegeHistoryDataJSON,
+    PrivilegeDataJSON,
+    FlightData,
+    OpenUser,
+)
 from .db.session import create_db_and_tables, SessionDep
-from .db.users import *
-from .db.bonuses import *
-from .db.flights import *
-from .db.tickets import *
+from .db.users import User, UserCreate
+from .db.bonuses import Privilege, PrivilegeHistory
+from .db.flights import Flight, Airport
+from .db.tickets import Ticket
 from .auth.token import validate_jwt, create_jwt, get_user_from_token
-from .services.flight import *
-from .services.bonus import *
-from .services.ticket import *
-
-from .auth import *
+from .services.flight import get_all_flights, get_flight
+from .services.bonus import get_user_privileges, get_privilege_history
+from .services.ticket import get_user_tickets, get_ticket, cancel_ticket
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(application: FastAPI):
+    del application
     create_db_and_tables()
     yield
 
@@ -41,9 +45,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-# Маршруты для авторизации
 @app.post("/api/v1/authorize", response_model=Token)
-def login_for_access_token(
+def login_for_access_token_endpoint(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: SessionDep,
 ):
@@ -83,7 +86,7 @@ def auth_dependency(credentials: HTTPAuthorizationCredentials = Depends(security
     try:
         payload = validate_jwt(token)
     except Exception as e:
-        raise HTTPException(401, "Bad Token")
+        raise HTTPException(401, "Bad Token") from e
     return payload
 
 
@@ -96,7 +99,7 @@ def auth_dependency(credentials: HTTPAuthorizationCredentials = Depends(security
         400: {"description": "Invalid input or username/email already exists"},
     },
 )
-def create_user(user_create: UserCreate, db: SessionDep) -> OpenUser:
+def create_user_endpoint(user_create: UserCreate, db: SessionDep) -> OpenUser:
     """
     Create a new user account from email, login and password
     """
@@ -131,28 +134,28 @@ def create_user(user_create: UserCreate, db: SessionDep) -> OpenUser:
 
 # Flight endpoints
 @app.get("/api/v1/flights", status_code=200)
-def flights(
+def get_flights_endpoint(
     page: int,
     size: int,
     session: SessionDep,
     user_info: dict = Depends(auth_dependency),
 ) -> PaginationResponse:
+    del user_info
     return get_all_flights(page, size, session)
 
 
 # Flight endpoints
-@app.get("/api/v1/flights/{flightNumber}", status_code=200)
-def flights(
-    flightNumber: str,
-    session: SessionDep,
-    user_info: dict = Depends(auth_dependency),
+@app.get("/api/v1/flights/{flight_number}", status_code=200)
+def get_flight_endpoint(
+    flight_number: str, session: SessionDep, user_info: dict = Depends(auth_dependency)
 ) -> FlightData:
-    return get_flight(flightNumber, session)
+    del user_info
+    return get_flight(flight_number, session)
 
 
 # Ticket endpoints
 @app.get("/api/v1/tickets", status_code=200)
-def tickets(
+def get_tickets_endpoint(
     session: SessionDep, user_info: dict = Depends(auth_dependency)
 ) -> list[TicketResponse]:
     user_id = user_info["id"]
@@ -161,12 +164,13 @@ def tickets(
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc):
+    del request
     return JSONResponse({"message": "what", "errors": exc.errors()[0]}, status_code=400)
 
 
 @app.post("/api/v1/tickets", status_code=200)
-def create_ticket(
-    ticketPurchaseRequest: TicketPurchaseRequest,
+def create_ticket_endpoint(
+    ticket_purchase_request: TicketPurchaseRequest,
     session: SessionDep,
     user_info: dict = Depends(auth_dependency),
 ) -> TicketPurchaseResponse:
@@ -174,7 +178,9 @@ def create_ticket(
 
     # Get flight info
     flight = session.exec(
-        select(Flight).where(Flight.flight_number == ticketPurchaseRequest.flightNumber)
+        select(Flight).where(
+            Flight.flight_number == ticket_purchase_request.flightNumber
+        )
     ).first()
     if not flight:
         raise HTTPException(status_code=404, detail="Flight not found")
@@ -183,7 +189,7 @@ def create_ticket(
     ticket = Ticket(
         user_id=user_id,
         flight_id=flight.id,
-        price=ticketPurchaseRequest.price,
+        price=ticket_purchase_request.price,
         status="PAID",
     )
     session.add(ticket)
@@ -200,20 +206,20 @@ def create_ticket(
         session.add(privilege)
         session.commit()
 
-    if ticketPurchaseRequest.paidFromBalance:
-        if privilege.balance >= ticketPurchaseRequest.price:
-            paidByMoney = 0
-            paidByBonuses = ticketPurchaseRequest.price
-            new_balance = privilege.balance - paidByBonuses
+    if ticket_purchase_request.paidFromBalance:
+        if privilege.balance >= ticket_purchase_request.price:
+            paid_by_money = 0
+            paid_by_bonuses = ticket_purchase_request.price
+            new_balance = privilege.balance - paid_by_bonuses
         else:
-            paidByMoney = ticketPurchaseRequest.price - privilege.balance
-            paidByBonuses = privilege.balance
+            paid_by_money = ticket_purchase_request.price - privilege.balance
+            paid_by_bonuses = privilege.balance
             new_balance = 0
     else:
-        paidByMoney = ticketPurchaseRequest.price
-        paidByBonuses = 0
+        paid_by_money = ticket_purchase_request.price
+        paid_by_bonuses = 0
         new_balance = privilege.balance + int(
-            ticketPurchaseRequest.price * 0.1
+            ticket_purchase_request.price * 0.1
         )  # 10% bonus
 
     # Update privilege
@@ -225,11 +231,11 @@ def create_ticket(
         privilege_id=privilege.id,
         ticket_id=ticket.id,
         datetime=datetime.now(),
-        balance_diff=int(ticketPurchaseRequest.price * 0.1)
-        if not ticketPurchaseRequest.paidFromBalance
-        else -paidByBonuses,
+        balance_diff=int(ticket_purchase_request.price * 0.1)
+        if not ticket_purchase_request.paidFromBalance
+        else -paid_by_bonuses,
         operation_type="FILL_IN_BALANCE"
-        if not ticketPurchaseRequest.paidFromBalance
+        if not ticket_purchase_request.paidFromBalance
         else "DEBIT_THE_ACCOUNT",
     )
     session.add(history)
@@ -250,31 +256,31 @@ def create_ticket(
         toAirport=f"{to_airport.city} {to_airport.name}",
         date=flight.datetime.astimezone().strftime("%Y-%m-%d %H:%M"),
         price=flight.price,
-        paidByMoney=paidByMoney,
-        paidByBonuses=paidByBonuses,
+        paidByMoney=paid_by_money,
+        paidByBonuses=paid_by_bonuses,
         status=ticket.status,
         privilege=PrivilegeDataJSON(balance=privilege.balance, status=privilege.status),
     )
 
 
-@app.get("/api/v1/tickets/{ticketUid}", status_code=200)
-def ticket_info(
-    ticketUid: str, session: SessionDep, user_info: dict = Depends(auth_dependency)
+@app.get("/api/v1/tickets/{ticket_id}", status_code=200)
+def ticket_info_endpoint(
+    ticket_id: str, session: SessionDep, user_info: dict = Depends(auth_dependency)
 ) -> TicketResponse:
     user_id = user_info["id"]
-    return get_ticket(user_id, ticketUid, session)
+    return get_ticket(user_id, ticket_id, session)
 
 
-@app.delete("/api/v1/tickets/{ticketUid}", status_code=204)
-def ticket_cancel(
-    ticketUid: str, session: SessionDep, user_info: dict = Depends(auth_dependency)
+@app.delete("/api/v1/tickets/{ticket_id}", status_code=204)
+def ticket_cancel_endpoint(
+    ticket_id: int, session: SessionDep, user_info: dict = Depends(auth_dependency)
 ):
     user_id = user_info["id"]
-    return cancel_ticket(user_id, ticketUid, session)
+    return cancel_ticket(user_id, ticket_id, session)
 
 
 @app.get("/api/v1/current_user", status_code=200)
-def get_current_user(
+def get_current_user_endpoint(
     token: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     db: SessionDep,
 ) -> OpenUser:
@@ -285,18 +291,17 @@ def get_current_user(
     )
     try:
         username = get_user_from_token(token.credentials)
-    except:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Bad Token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
     if username is None:
         raise credentials_exception
-    token_data = TokenData(username=username)
 
-    user = db.exec(select(User).where(User.login == token_data.username)).first()
+    user = db.exec(select(User).where(User.login == username)).first()
     if user is None:
         raise credentials_exception
     return OpenUser(id=user.id, login=user.login, email=user.email)
@@ -304,7 +309,7 @@ def get_current_user(
 
 # User endpoints
 @app.get("/api/v1/me", status_code=200)
-def user_info(
+def get_user_info_endpoint(
     session: SessionDep, user_info: dict = Depends(auth_dependency)
 ) -> UserInfoResponse:
     user_id = user_info["id"]
@@ -315,7 +320,7 @@ def user_info(
 
 
 @app.get("/api/v1/privilege", status_code=200)
-def privilege_info(
+def privilege_info_endpoint(
     session: SessionDep, user_info: dict = Depends(auth_dependency)
 ) -> PrivilegeHistoryDataJSON:
     user_id = user_info["id"]

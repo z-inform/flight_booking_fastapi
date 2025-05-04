@@ -1,8 +1,15 @@
 from sqlmodel import select, Session, update
 from fastapi import HTTPException
-from ..db.tickets import Ticket, TicketDataJSON, TicketJSON, TicketResponse
-from ..db.flights import FlightData, Flight, Airport
-from ..db.bonuses import Privilege, PrivilegeHistory, PaymentDataJSON
+from ..db.tickets import Ticket
+from ..db.api_responses import (
+    TicketDataJSON,
+    TicketJSON,
+    TicketResponse,
+    FlightData,
+    PaymentDataJSON,
+)
+from ..db.flights import Flight, Airport
+from ..db.bonuses import Privilege, PrivilegeHistory
 import datetime as dt
 from typing import Optional
 
@@ -45,17 +52,13 @@ def get_user_tickets(user_id: int, session: Session) -> list[TicketResponse]:
 def get_ticket(user_id: int, ticket_id: int, session: Session) -> TicketResponse:
     """Get single ticket by ID for a specific user"""
     ticket = session.exec(
-        select(Ticket).where(
-            (Ticket.id == ticket_id) & (Ticket.user_id == user_id)
-        )
+        select(Ticket).where((Ticket.id == ticket_id) & (Ticket.user_id == user_id))
     ).first()
 
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    flight = session.exec(
-        select(Flight).where(Flight.id == ticket.flight_id)
-    ).first()
+    flight = session.exec(select(Flight).where(Flight.id == ticket.flight_id)).first()
 
     if not flight:
         raise HTTPException(status_code=404, detail="Flight not found")
@@ -114,9 +117,7 @@ def cancel_ticket(
 ) -> Optional[TicketJSON]:
     """Cancel a ticket and refund bonuses if applicable"""
     ticket = session.exec(
-        select(Ticket).where(
-            (Ticket.id == ticket_id) & (Ticket.user_id == user_id)
-        )
+        select(Ticket).where((Ticket.id == ticket_id) & (Ticket.user_id == user_id))
     ).first()
 
     if not ticket:
@@ -125,9 +126,7 @@ def cancel_ticket(
     if ticket.status == "CANCELED":
         return None
 
-    flight = session.exec(
-        select(Flight).where(Flight.id == ticket.flight_id)
-    ).first()
+    flight = session.exec(select(Flight).where(Flight.id == ticket.flight_id)).first()
 
     # Update ticket status
     ticket.status = "CANCELED"

@@ -1,11 +1,8 @@
-from fastapi import *
-from fastapi.responses import *
-from sqlmodel import *
-import os
-import requests
 from datetime import timedelta, datetime
+import os
+
+from fastapi import HTTPException
 import jwt
-from jwt.algorithms import RSAAlgorithm
 
 
 algo = os.environ['ALGORITHM']
@@ -24,11 +21,11 @@ def validate_jwt(token: str):
             options={"verify_exp": True},
         )
         return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.ExpiredSignatureError as e:
+        raise HTTPException(status_code=401, detail="Token expired") from e
     except Exception as e:
         print(f"Invalid token: {str(e)}")
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}") from e
 
 
 def create_jwt(data: dict, expires_delta: timedelta | None = None):

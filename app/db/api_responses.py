@@ -1,12 +1,4 @@
-# from sqlalchemy.orm import DeclarativeBase
-# from sqlalchemy.orm import *
-# from sqlalchemy import *
-
-from fastapi import *
-from sqlmodel import *
-
-# - GET api/v1/flights?page=&size=
-# ответ
+from sqlmodel import SQLModel
 
 
 class FlightResponse(SQLModel):
@@ -17,6 +9,12 @@ class FlightResponse(SQLModel):
     price: int
 
 
+class OpenUser(SQLModel):
+    id: int
+    login: str
+    email: str
+
+
 class PaginationResponse(SQLModel):
     page: int
     pageSize: int
@@ -24,10 +22,6 @@ class PaginationResponse(SQLModel):
     items: list[FlightResponse]
 
 
-# - GET api/v1/tickets
-# заголовок X-User-Name
-# ответ
-# [
 class TicketResponse(SQLModel):
     ticket_id: int
     flightNumber: str
@@ -38,36 +32,15 @@ class TicketResponse(SQLModel):
     status: str
 
 
-#   {
-#     "ticketUid": "049161bb-badd-4fa8-9d90-87c9a82b0668",
-#     "flightNumber": "AFL031",
-#     "fromAirport": "Санкт-Петербург Пулково",
-#     "toAirport": "Москва Шереметьево",
-#     "date": "2021-10-08 20:00",
-#     "price": 1500,
-#     "status": "PAID"
-#   }
-# ]
-
 class Token(SQLModel):
     access_token: str
     token_type: str
 
-# - POST api/v1/tickets
-# заголовок X-User-Name
+
 class TicketPurchaseRequest(SQLModel):
     flightNumber: str
     price: int
     paidFromBalance: bool
-
-
-# {
-#   "flightNumber": "AFL031",
-#   "price": 1500,
-#   "paidFromBalance": true
-# }
-# ответ
-# 200
 
 
 class PrivilegeDataJSON(SQLModel):
@@ -88,93 +61,14 @@ class TicketPurchaseResponse(SQLModel):
     privilege: PrivilegeDataJSON
 
 
-# {
-#   "ticketUid": "049161bb-badd-4fa8-9d90-87c9a82b0668",
-#   "flightNumber": "AFL031",
-#   "fromAirport": "Санкт-Петербург Пулково",
-#   "toAirport": "Москва Шереметьево",
-#   "date": "2021-10-08 20:00",
-#   "price": 1500,
-#   "paidByMoney": 1500,
-#   "paidByBonuses": 0,
-#   "status": "PAID",
-#   "privilege": {
-#     "balance": 1500,
-#     "status": "GOLD"
-#   }
-# }
-# 400
-# {
-#   "message": "string",
-#   "errors": [
-#     {
-#       "field": "string",
-#       "error": "string"
-#     }
-#   ]
-# }
-
-# - GET /api/v1/tickets/{ticketUid}
-# заголовок X-User-Name
-# query-param X-User-Name
-# 200
-# {
-#   "ticketUid": "049161bb-badd-4fa8-9d90-87c9a82b0668",
-#   "flightNumber": "AFL031",
-#   "fromAirport": "Санкт-Петербург Пулково",
-#   "toAirport": "Москва Шереметьево",
-#   "date": "2021-10-08 20:00",
-#   "price": 1500,
-#   "status": "PAID"
-# }
-# 404
-# {
-#   "message": "string"
-# }
-
-# - DELETE /api/v1/tickets/{ticketUid}
-# заголовок X-User-Name
-# query-param X-User-Name
-# 204 возврат выполнен
-# 404 билет не найден
-# {
-#   "message": "string"
-# }
-
-
-# - GET /api/v1/me
-# заголовок X-User-Name
-# 200
 class UserInfoResponse(SQLModel):
     tickets: list[TicketResponse]
     privilege: PrivilegeDataJSON
 
 
-# {
-#   "tickets": [
-#     {
-#       "ticketUid": "049161bb-badd-4fa8-9d90-87c9a82b0668",
-#       "flightNumber": "AFL031",
-#       "fromAirport": "Санкт-Петербург Пулково",
-#       "toAirport": "Москва Шереметьево",
-#       "date": "2021-10-08 20:00",
-#       "price": 1500,
-#       "status": "PAID"
-#     }
-#   ],
-#   "privilege": {
-#     "balance": 1500,
-#     "status": "GOLD"
-#   }
-# }
-
-
-# - GET /api/v1/privilege
-# заголовок X-User-Name
-# 200
 class HistoryData(SQLModel):
     date: str
-    ticketUid: str
+    ticket_id: int
     balanceDiff: int
     operationType: str
 
@@ -183,20 +77,6 @@ class PrivilegeInfoResponse(SQLModel):
     balance: int
     status: str
     history: list[HistoryData]
-
-
-# {
-#   "balance": 1500,
-#   "status": "GOLD",
-#   "history": [
-#     {
-#       "date": "2021-10-08T19:59:19Z",
-#       "ticketUid": "049161bb-badd-4fa8-9d90-87c9a82b0668",
-#       "balanceDiff": 1500,
-#       "operationType": "FILL_IN_BALANCE"
-#     }
-#   ]
-# }
 
 
 class PrivilegeHistoryDataJSON(SQLModel):

@@ -1,20 +1,6 @@
-from sqlmodel import *
 import datetime as dt
 
-
-class FlightData(SQLModel):
-    flightNumber: str
-    fromAirport: str
-    toAirport: str
-    date: str
-    price: int
-
-
-class FlightsResponse(SQLModel):
-    page: int
-    pageSize: int
-    totalElements: int
-    items: list[FlightData]
+from sqlmodel import SQLModel, Field, Column, TIMESTAMP
 
 
 class Flight(SQLModel, table=True):
@@ -29,7 +15,11 @@ class Flight(SQLModel, table=True):
     price: int = Field(nullable=False)
 
     def __repr__(self):
-        return f"id={self.id}, flight_number={self.flight_number}, datetime={self.datetime}, from_airport_id={self.from_airport_id}, to_airport_id={self.to_airport_id}, price={self.price}"
+        return (
+            f"id={self.id}, flight_number={self.flight_number},"
+            f"datetime={self.datetime}, from_airport_id={self.from_airport_id},"
+            f"to_airport_id={self.to_airport_id}, price={self.price}"
+        )
 
 
 class Airport(SQLModel, table=True):

@@ -4,6 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from sqlmodel import *
 from ..db.bonuses import *
 from ..db.session import SessionDep
+from ..db.api_responses import PrivilegeDataJSON, PrivilegeHistoryDataJSON, HistoryData
 from typing import Annotated
 from fastapi.encoders import jsonable_encoder
 from contextlib import asynccontextmanager
@@ -11,6 +12,7 @@ import uvicorn
 from multiprocessing import Process
 import os
 import datetime as dt
+
 
 def get_user_privileges(user_id: int, session: SessionDep) -> PrivilegeDataJSON:
     privilege = session.exec(
@@ -21,7 +23,9 @@ def get_user_privileges(user_id: int, session: SessionDep) -> PrivilegeDataJSON:
     return privilege
 
 
-def get_privilege_history(user_id: int, session: SessionDep) -> PrivilegeHistoryDataJSON:
+def get_privilege_history(
+    user_id: int, session: SessionDep
+) -> PrivilegeHistoryDataJSON:
     query = select(Privilege).where(Privilege.user_id == user_id)
     privilege = session.exec(query).first()
     if not privilege:
